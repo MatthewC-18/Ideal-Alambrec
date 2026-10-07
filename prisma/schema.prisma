@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SUPERVISOR
+  ASESOR
+  LECTOR
+}
+
+enum VersionStatus {
+  BORRADOR
+  VIGENTE
+  ARCHIVADA
+}
+
+enum QuoteStatus {
+  BORRADOR
+  ENVIADA
+  ACEPTADA
+  RECHAZADA
+  VENCIDA
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  name        String
+  phone       String?
+  role        Role      @default(ASESOR)
+  active      Boolean   @default(true)
+  isDemo      Boolean   @default(false)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  quotes    Quote[]    @relation("QuoteOwner")
+  customers Customer[]
+  audits    AuditLog[]
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  company     String?
+  taxId       String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  tierKey     String   @default("PVS")
+  notes       String?
+  isDemo      Boolean  @default(false)
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quotes Quote[]
+
+  @@index([name])
+}
+
+model Product {
+  id        String  @id @default(cuid())
+  sap       String  @unique
+  name      String
+  family    String
+  finish    String?
+  weightKg  Decimal @default(0) @db.Decimal(12, 4)
+  active    Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  prices PriceListItem[]
+}
+
+model PriceList {
+  id            String        @id @default(cuid())
+  name          String
+  status        VersionStatus @default(BORRADOR)
+  source        String?
+  notes         String?
+  createdById   String?
+  publishedById String?
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+
+  items  PriceListItem[]
+  tiers  PriceListTier[]
+  quotes Quote[]
+}
+
+model PriceListItem {
+  id          String    @id @default(cuid())
+  priceListId String
+  priceList   PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  pvs         Decimal   @db.Decimal(16, 6)
+
+  @@unique([priceListId, productId])
+}
+
+model PriceListTier {
+  id          String    @id @default(cuid())
+  priceListId String
+  priceList   PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
+  key         String
+  label       String
+  discountPct Decimal   @db.Decimal(8, 6)
+  sortOrder   Int       @default(0)
+
+  @@unique([priceListId, key])
+}
+
+model RuleSet {
+  id          String        @id @default(cuid())
+  version     Int           @unique
+  status      VersionStatus @default(BORRADOR)
+  data        Json
+  notes       String?
+  createdById String?
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+
+  quotes Quote[]
+}
+
+model Quote {
+  id                String      @id @default(cuid())
+  number            String      @unique
+  status            QuoteStatus @default(BORRADOR)
+  customerId        String
+  customer          Customer    @relation(fields: [customerId], references: [id])
+  ownerId           String
+  owner             User        @relation("QuoteOwner", fields: [ownerId], references: [id])
+  priceListId       String
+  priceList         PriceList   @relation(fields: [priceListId], references: [id])
+  ruleSetId         String
+  ruleSet           RuleSet     @relation(fields: [ruleSetId], references: [id])
+  tierKey           String
+  tierPct           Decimal     @db.Decimal(8, 6)
+  descLivianos      Decimal     @default(0) @db.Decimal(8, 6)
+  descPesados       Decimal     @default(0) @db.Decimal(8, 6)
+  globalDiscountPct Decimal     @default(0) @db.Decimal(8, 6)
+  ivaRate           Decimal     @db.Decimal(8, 6)
+  projectSite       String?
+  notes             String?
+  validityDays      Int         @default(15)
+  input             Json
+  subtotal          Decimal     @db.Decimal(14, 2)
+  discountTotal     Decimal     @db.Decimal(14, 2)
+  iva               Decimal     @db.Decimal(14, 2)
+  total             Decimal     @db.Decimal(14, 2)
+  weightKg          Decimal     @db.Decimal(14, 3)
+  hasOverrides      Boolean     @default(false)
+  isDemo            Boolean     @default(false)
+  sentAt            DateTime?
+  decidedAt         DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  lines  QuoteLine[]
+  emails EmailLog[]
+
+  @@index([ownerId, createdAt])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model QuoteLine {
+  id            String   @id @default(cuid())
+  quoteId       String
+  quote         Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  sortOrder     Int
+  segmentIndex  Int?
+  section       String
+  source        String
+  ruleLineId    String?
+  sap           String?
+  description   String
+  qty           Decimal  @db.Decimal(14, 3)
+  unitPvs       Decimal? @db.Decimal(16, 6)
+  listPrice     Decimal? @db.Decimal(14, 2)
+  unitPrice     Decimal  @db.Decimal(14, 2)
+  total         Decimal  @db.Decimal(14, 2)
+  weightKg      Decimal  @db.Decimal(14, 3)
+  priceOverride Boolean  @default(false)
+  qtyOverride   Boolean  @default(false)
+}
+
+model QuoteCounter {
+  year Int @id
+  last Int @default(0)
+}
+
+model EmailLog {
+  id         String   @id @default(cuid())
+  quoteId    String
+  quote      Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  to         String
+  cc         String?
+  subject    String
+  body       String
+  status     String
+  error      String?
+  messageId  String?
+  sentById   String
+  createdAt  DateTime @default(now())
+}
+
+model Setting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  at        DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  userEmail String?
+  action    String
+  entity    String
+  entityId  String?
+  summary   String
+  before    Json?
+  after     Json?
+  ip        String?
+  userAgent String?
+
+  @@index([at])
+  @@index([entity, entityId])
+  @@index([userId])
+}

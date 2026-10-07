@@ -110,7 +110,7 @@ El archivo analizado (`legacy/Cotizador_PRO_V6R02-2026.xlsm`, 4.2 MB, con VBA) e
 **Opción C — Web app desplegada en nube de Ideal Alambrec**, como **SaaS interno** del grupo.
 
 - Frontend: Next.js (React) con tema de colores corporativos de Ideal Alambrec / Grupo AG.
-- Backend: Node.js (NestJS) o Python (FastAPI).
+- Backend: Node.js (en el piloto se integró en la misma app Next.js; ver `02-propuesta-tecnica.md` v0.2).
 - Base de datos: PostgreSQL.
 - Autenticación: **SSO con Microsoft 365** (ya tienen correos `@bekaert.com`), con roles (Asesor, Supervisor, Gerente Comercial, IT, Lector).
 - Auditoría: tabla `audit_log` con `user_id, action, entity, before, after, timestamp, ip`.
@@ -150,23 +150,18 @@ Esto cubre todos los dolores que mencionaron **y** los puntos que no estaban con
 
 ## 7. Competencia / referencias del sector
 
-### Competencia directa de Ideal Alambrec en Ecuador (fabricantes de alambre/malla/cerramientos)
-- **Novacero** — líder en acero, también produce mallas y cercos.
-- **Andec / Adelca** — foco en varilla y acero, menos en cercas, pero compiten en obras grandes.
-- **Prodinsa (Chile)** — exporta alambres y mallas a Ecuador.
-- **ArcelorMittal** — importador industrial.
-- **Fisum, Imeco, Treflería Perseo** — jugadores menores.
+### Competencia directa de Ideal Alambrec en Ecuador
 
-La **mayoría de ellos sigue cotizando con Excel o PDF manual**. Nadie en el rubro tiene un cotizador web público. Esto es una oportunidad: si Ideal lo saca primero, puede volverlo un diferenciador comercial (clientes finales le piden al vendedor “mándame la cotización por el link” en vez de esperar un Excel por WhatsApp).
+> **Corrección:** la versión anterior listaba competidores y afirmaba que “nadie en el rubro tiene un cotizador web”. No estaba verificado y se retiró; ver `06-competencia-y-contexto.md` §2 para lo que falta confirmar.
 
-Referencia internacional del mismo grupo: **Proalco (Bekaert Colombia)** publicó una app para simular proyectos CercasPro. Hay precedente dentro del grupo.
+Referencia de la marca CercasPro: **Proalco (Bekaert Colombia)** menciona en su catálogo 2021 una app para simular proyectos. Es de Bekaert, no de Grupo AG.
 
 ### Competencia de software CPQ genérico
 - Salesforce CPQ, HubSpot CPQ, SAP CPQ, Oracle CPQ → caros, demasiado grandes para este caso.
 - Odoo (open source) → tiene módulo de cotizaciones, se puede personalizar.
 - Flowlu, QuoteWerks, PandaDoc → genéricos, no entienden cálculo lineal por metro.
 
-**Ninguno viene con la lógica de cálculo lineal de cerramientos.** Por eso tiene sentido hacer uno a medida (y venderlo después a otros fabricantes).
+Ninguno trae de fábrica la lógica de cálculo de cerramientos de Ideal; habría que programarla igual. Por eso tiene sentido hacerlo a medida.
 
 ---
 

@@ -4,6 +4,8 @@
 
 Este documento define cómo vender el proyecto a Ideal Alambrec. Dos modelos a elegir según la conversación con IT.
 
+> **Todos los montos son estimaciones iniciales para negociar**, no precios de mercado verificados. Ajustarlos a tus costos (horas reales, hosting, soporte) antes de enviar la propuesta.
+
 ---
 
 ## Modelo A — SaaS (suscripción mensual)
@@ -109,4 +111,4 @@ Si IT bloquea el SaaS por política de datos, se cambia a Modelo B sin perder el
 | IT exige nube propia | Modelo B listo. |
 | Grupo AG tiene su propio software corporativo en roadmap | Preguntar en primera reunión; nuestra propuesta es más rápida de desplegar y específica para Ecuador. |
 | Resistencia al cambio de asesores | Incluir capacitación + UI que replica el flujo del Excel. |
-| Precio percibido como alto | Comparar con costo de 1 persona de IT dedicada a actualizar el Excel = $900/mes mínimo. Nuestro SaaS lo paga en 2 meses. |
+| Precio percibido como alto | Comparar con el costo real de mantener el Excel: horas del programador por cada cambio de precios, tiempo de redistribución PC por PC y errores como los de `07-hallazgos-excel.md`. Pedir a Ideal esas horas para calcular el retorno con sus números. |

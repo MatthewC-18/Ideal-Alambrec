@@ -23,7 +23,8 @@ Los 24 asesores comerciales de Ideal Alambrec cotizan hoy con un archivo Excel c
 - **Audit log inmutable**: cada acción queda registrada con usuario, fecha, IP.
 - **PDF corporativo** con marca de Ideal, enviado al cliente por correo desde la misma plataforma.
 - **Dashboard por asesor y por supervisor**: cotizaciones del día/mes, pipeline, conversión.
-- **Idéntico resultado numérico que el Excel actual** (validado con tests contra el archivo original).
+- **Mismo cálculo que el Excel actual**, validado con 285 casos recalculados del archivo original; además corrige 3 errores del Excel que hoy producen cotizaciones incompletas o con sobreprecio (ver `07-hallazgos-excel.md`).
+- **Configuración sin programador**: precios (importando el Excel de siempre), reglas de cálculo con simulador, usuarios y límites de descuento.
 
 ## Lo que necesitamos de IT (ronda 1)
 
@@ -35,8 +36,8 @@ Los 24 asesores comerciales de Ideal Alambrec cotizan hoy con un archivo Excel c
 
 ## Lo que entregamos
 
-- Código fuente completo (TypeScript / Node / PostgreSQL — stacks estándar auditables).
-- Infraestructura como código (Terraform) para que IT pueda revisarla.
+- Código fuente completo (TypeScript / Next.js / PostgreSQL — stack estándar auditable).
+- `Dockerfile` y `docker-compose.yml` para levantarlo en cualquier nube o servidor.
 - Documentación técnica + runbook de operación.
 - Capacitación a asesores y a IT.
 - Soporte 24h en los primeros 30 días post go-live.
@@ -44,18 +45,20 @@ Los 24 asesores comerciales de Ideal Alambrec cotizan hoy con un archivo Excel c
 ## Tiempos
 
 - **Reunión de alineamiento con IT**: semana 1.
-- **MVP en producción**: semana 10.
+- **Piloto funcional**: listo (con datos reales de precios y asesores). Producción depende de SSO, correo y hosting.
 - **Fase 2** (facturación SRI, aprobación de descuentos, SAP): a partir del mes 3.
 
-## Seguridad resumida
+## Seguridad
 
-- TLS 1.3 extremo a extremo.
-- MFA heredado del SSO corporativo.
-- Secrets en Key Vault / Secrets Manager, nunca en código.
-- Backups cifrados at rest.
-- Dependencias auditadas semanalmente.
-- Logs de auditoría append-only.
+Ya implementado en el piloto:
+- SSO OIDC (Microsoft Entra ID / Google); MFA y altas/bajas los controla el tenant de Grupo AG.
+- Permisos por rol verificados en el servidor; límites de descuento por rol.
+- Auditoría append-only protegida por un trigger en PostgreSQL, exportable a CSV.
+- Cabeceras de seguridad HTTP; secretos solo en variables de entorno.
+
+A configurar en producción con IT:
+- HTTPS/TLS en el hosting elegido, gestor de secretos (Key Vault / Secrets Manager), respaldos cifrados de la base, monitoreo de dependencias, pen-test si lo exigen.
 
 ---
 
-**Siguiente paso sugerido:** 45 min de reunión con IT para resolver los 5 puntos arriba y firmar NDA.
+**Siguiente paso sugerido:** 45 min de reunión con IT para resolver los 5 puntos arriba, con demo del piloto (guion en `08-guia-piloto.md`).

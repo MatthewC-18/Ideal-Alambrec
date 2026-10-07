@@ -1,6 +1,6 @@
 # Contexto competitivo y de mercado
 
-**Versión:** v0.1 · **Fecha:** 2026-10-07
+**Versión:** v0.2 (corregida) · **Fecha:** 2026-10-07
 
 Material para blindar la propuesta frente a Ideal/Grupo AG y preparar los próximos pasos de venta.
 
@@ -19,33 +19,27 @@ Material para blindar la propuesta frente a Ideal/Grupo AG y preparar los próxi
 
 ## 2. Competencia directa de Ideal Alambrec en Ecuador
 
-| Competidor | Enfoque | Nivel de digitalización comercial |
-|---|---|---|
-| **Novacero** | Acero, varilla, mallas electrosoldadas, cerramientos | Catálogo online pero cotización por correo/vendedor |
-| **Adelca / Andec** | Varilla, acero estructural, perfiles | Portal B2B parcial; cotización offline |
-| **Prodinsa (Chile, exporta a EC)** | Alambres y mallas | Catálogo online; sin cotizador público |
-| **ArcelorMittal** | Acero importado | Enterprise; no local al mercado ecuatoriano |
-| **Fisum, Imeco, Trefilería Perseo** | Jugadores menores | Teléfono y WhatsApp |
+> **Corrección (v0.2):** la versión anterior de este documento tenía una tabla de competidores con su “nivel de digitalización” y afirmaba que ninguno tenía cotizador web. **Eso no estaba verificado** (la búsqueda no devolvió fuentes sobre competidores) y se retiró. Antes de usar este argumento con Ideal hay que confirmarlo.
 
-**Hallazgo:** ninguno tiene un cotizador web público para cerramientos en Ecuador. Si Ideal lo lanza primero, se diferencia claramente.
+Pendiente de investigar con fuentes (o preguntarle al área comercial de Ideal, que conoce el mercado):
 
-## 3. Precedente dentro del grupo
+- Qué fabricantes e importadores compiten en cerramientos, alambre de púas y mallas en Ecuador.
+- Si alguno ofrece cotizador en línea, configurador o app para distribuidores.
+- Cómo cotizan a constructoras y distribuidores (correo, WhatsApp, portal B2B).
 
-**Proalco (Bekaert Colombia)** publicó una app para simular proyectos CercasPro. Hay base de que el grupo acepta herramientas digitales de cotización. Vale la pena citarlo en la propuesta a IT.
+## 3. Referencia dentro de Bekaert (no de Grupo AG)
+
+El catálogo CercasPro 2021 de **Proalco (Bekaert Colombia)** menciona una aplicación para simular visualmente el proyecto. Proalco es de Bekaert, no de Grupo AG (la compra de junio 2025 cubre Ecuador, Costa Rica y Venezuela según la nota citada), así que sirve como ejemplo de la marca CercasPro, **no** como precedente del grupo actual.
 
 > Fuente: [Catálogo Cercas Pro 2021 — Proalco](https://proalco.bekaert.com/content/dam/bekaert-proalco/catalogos/Catalogo-Cercas-Pro-2021.pdf).
 
-## 4. Software CPQ genérico (y por qué no sirve tal cual)
+## 4. Software CPQ genérico (y por qué no basta tal cual)
 
-| Producto | Pega para Ideal |
-|---|---|
-| **Salesforce CPQ / SAP CPQ / Oracle CPQ** | Precio enterprise (50k+/año), largo onboarding. Over-engineered. |
-| **HubSpot CPQ** | No tiene lógica de cálculo lineal por metro. |
-| **Odoo** (open source) | Flexible pero requiere consultor Odoo caro, UI pesada. |
-| **Flowlu, QuoteWerks, PandaDoc** | Genéricos para servicios. No entienden "paneles por longitud". |
-| **Software CPQ específico para cercas (US: Harvest, FenceWorks)** | Pensado para contratistas instaladores, no fabricantes. Facturación US (ACH). No cumple SRI Ecuador. |
+- Los CPQ grandes (Salesforce, SAP, Oracle) y los generalistas (HubSpot, Odoo, PandaDoc, Quotient, DealHub) se pueden configurar, pero no traen la lógica de cerramientos de Ideal (tramos por longitud, postes por altura, fijaciones por poste, escalonamiento, rollos de púas): habría que programarla igual, encima de una licencia.
+- Las herramientas para cercas que aparecieron en la búsqueda están orientadas a contratistas instaladores de EE. UU. (cobros ACH), no a un fabricante en Ecuador.
+- Precios y alcance de cada producto: no verificados; si se usan en la propuesta, cotizarlos con cada proveedor.
 
-**Conclusión:** la lógica de cálculo del Excel actual (paneles, postes, accesorios por metro, ajuste por pendiente) es específica y no la trae ningún CPQ comercial. Por eso tiene sentido construirla a medida — y venderla después a otros fabricantes LatAm.
+**Conclusión:** construir a medida tiene sentido porque la regla de cálculo es propia de Ideal, y ya está validada contra su Excel (ver `07-hallazgos-excel.md`).
 
 > Fuentes: [Capterra directorio CPQ](https://www.capterra.es/directory/30904/cpq/software), [HubSpot — Mejores software de cotización](https://blog.hubspot.es/sales/mejores-software-cotizacion?app=wp).
 
@@ -59,20 +53,17 @@ Material para blindar la propuesta frente a Ideal/Grupo AG y preparar los próxi
 
 ## 6. Mercado y timing
 
-- GlobalData proyecta la construcción en Ecuador +3.3% real en 2026 — buen momento para digitalizar la venta de materiales.
-- El tercer trimestre de 2025 cerró con crecimiento interanual débil (0.8%), pero el pipeline de obras públicas de Grupo AG (Quito, Guayaquil, provincias) está activo.
-- Las franquicias y distribuidores de Ideal — segmento de alto volumen de cotizaciones — son los **early adopters naturales** si en Fase 3 se abre el acceso a tier distribuidor.
+- GlobalData proyecta que la construcción en Ecuador crezca 3,3 % real en 2026.
+- El Banco Central registró en el cuarto trimestre de 2025 un crecimiento interanual de apenas 0,8 %.
+- (Se retiró una afirmación sobre “obras públicas de Grupo AG”: no tenía fuente.)
 
-## 7. Argumentos de venta hacia Ideal
+## 7. Argumentos de venta hacia Ideal (verificables)
 
-Cuando presentes la propuesta, apóyate en:
-
-1. **"Nadie en su rubro lo tiene"** — diferenciador competitivo real.
-2. **"Grupo AG ya aceptó herramientas digitales en Colombia"** — hay precedente.
-3. **"Cumple SRI y LOPDP"** — IT no se puede negar por regulación.
-4. **"Idéntico al Excel actual"** — mitiga el miedo al cambio.
-5. **"Pueden crecer sin reescribir"** — llegamos a franquicias, distribuidores, otros países del grupo.
-6. **"Pagan el SaaS en 2 meses contra el costo de mantener el Excel"** — ROI claro.
+1. **“Cotiza igual que su Excel, pero sin sus errores”** — 285 casos comparados contra el Excel original; 9 hallazgos documentados (`07-hallazgos-excel.md`).
+2. **“Cambian precios y reglas ustedes mismos”** — lista nueva desde Excel, ajuste masivo por %, reglas con simulador; sin redistribuir archivos.
+3. **“Saben quién hizo qué”** — SSO corporativo + auditoría que ni un administrador puede borrar.
+4. **“Precios y reglas versionados”** — cada cotización guarda la lista y las reglas con que se hizo.
+5. **“Listo para probar”** — piloto funcionando con sus precios reales y sus 19 asesores.
 
 ---
 

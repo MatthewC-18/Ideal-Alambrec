@@ -1,79 +1,41 @@
 # Roadmap de ejecución
 
-**Versión:** v0.1 · **Fecha:** 2026-10-07
+**Versión:** v0.2 · **Fecha:** 2026-10-07
 
-Checklist viva. Marcar `[x]` conforme avanzamos.
+## Fase 0 — Descubrimiento
+- [x] Análisis del Excel (fórmulas, macros, hojas ocultas, lista de precios).
+- [x] Decisiones iniciales con el cliente (`01-decisiones.md`).
+- [ ] Reunión con IT de Grupo AG (hosting, SSO, dominio, correo).
+- [ ] Manual de marca oficial (el piloto usa el logo Ideal Alambrec + Grupo AG que trae el Excel).
+- [ ] Respuestas a las 3 preguntas de `07-hallazgos-excel.md`.
 
----
+## Fase 1 — Piloto / MVP
+- [x] Motor de cálculo configurable + 285 casos comparados contra el Excel.
+- [x] Base de datos PostgreSQL con migraciones; auditoría append-only.
+- [x] Login SSO (Microsoft/Google listo para conectar) + acceso piloto con PIN.
+- [x] Roles: asesor, supervisor, administrador, solo lectura.
+- [x] Armador de cotizaciones con cálculo en vivo, varios cerramientos, ajustes con límite por rol, catálogo e ítems libres.
+- [x] PDF con marca; envío por correo (simulado hasta tener SMTP).
+- [x] Estados, duplicar con precios vigentes, historial por cotización.
+- [x] Dashboard (KPIs, cotizado vs aceptado, embudo, asesores, seguimiento).
+- [x] Clientes, catálogo por categoría.
+- [x] Configuración: listas de precios (importar Excel, ajuste masivo, comparar, publicar), reglas con simulador y versiones, usuarios, empresa/IVA/límites/correo, borrar datos demo.
+- [x] Auditoría con filtros y exportación CSV.
+- [x] Diseño responsive (probado a 390 px) y build de producción.
+- [ ] Probar `docker compose` en un equipo con Docker.
+- [ ] Probar en Safari/iPhone y Edge.
+- [ ] Conectar SSO real y SMTP real.
+- [ ] UAT con 2–3 asesores.
+- [ ] Capacitación y go-live.
 
-## Fase 0 — Descubrimiento y validación (semanas 1–2)
+## Fase 2 — Upsell (propuesta)
+- [ ] Flujo de aprobación de descuentos por supervisor.
+- [ ] Aceptación online de la cotización por el cliente (link firmado).
+- [ ] Facturación electrónica SRI vía integrador.
+- [ ] Integración con SAP (precios, stock, clientes).
+- [ ] Reportes avanzados.
 
-- [ ] Reunión con IT de Grupo AG — confirmar modelo de hosting.
-- [ ] Validar lista maestra de precios 2026 con el área comercial.
-- [ ] Obtener manual de marca de Ideal Alambrec (logo vectorial, paleta, tipografía).
-- [ ] Confirmar dominio y tenant de SSO.
-- [ ] Firma de NDA + propuesta comercial.
-- [ ] Firma de contrato + anticipo.
-
-## Fase 1 — MVP (semanas 3–10)
-
-### Infra
-- [ ] Repo con CI/CD en GitHub Actions.
-- [ ] Entorno staging con dominio propio.
-- [ ] Base de datos PostgreSQL + migraciones Prisma.
-- [ ] Redis + colas.
-- [ ] Blob storage para PDFs y logos.
-
-### Backend
-- [ ] Modelo de datos (User, Customer, Product, PriceList, Quote).
-- [ ] Endpoints REST + OpenAPI.
-- [ ] Autenticación SSO (Entra ID / Google OIDC).
-- [ ] Permisos por rol (Asesor, Supervisor, Admin, Lector).
-- [ ] Audit log append-only.
-- [ ] Importador de precios desde CSV.
-- [ ] Importador de asesores desde CSV.
-- [ ] Motor de cálculo `QuoteCalculator` con tests contra el Excel original.
-- [ ] Servicio de generación de PDF.
-- [ ] Servicio de envío de correo con tracking de entrega.
-
-### Frontend
-- [ ] Diseño UI en Figma (3 iteraciones con cliente).
-- [ ] Theme con colores corporativos de Ideal Alambrec.
-- [ ] Login con SSO.
-- [ ] Dashboard por asesor (mis cotizaciones del mes, pipeline).
-- [ ] Dashboard de supervisor (todo el equipo).
-- [ ] Formulario de cotización por tipo (Perimetral, Urbana, Intradomiciliaria, Máxima Seguridad).
-- [ ] Preview del PDF en pantalla.
-- [ ] Botón enviar al cliente por correo.
-- [ ] Historial y búsqueda de cotizaciones.
-- [ ] Admin: edición de productos, precios, usuarios.
-- [ ] Panel de audit log para supervisores.
-- [ ] PWA instalable (web app en móvil).
-
-### Validación
-- [ ] 20 cotizaciones de prueba comparadas contra el Excel original — diferencia ≤ $0.01.
-- [ ] Pruebas de carga con 50 usuarios concurrentes.
-- [ ] Pen-test básico (headers, auth, injection).
-- [ ] UAT con 2–3 asesores "early adopters".
-
-### Lanzamiento
-- [ ] Capacitación en vivo (2 sesiones de 1h).
-- [ ] Video de capacitación grabado.
-- [ ] Manual de usuario (PDF).
-- [ ] Go-live.
-- [ ] 30 días de hypercare.
-
-## Fase 2 — Upsell (a partir del mes 3)
-
-- [ ] Flujo de aprobación de descuentos.
-- [ ] Firma / aceptación online del cliente (link firmado).
-- [ ] Facturación electrónica SRI (integración con Dátil o Contífico).
-- [ ] Integración con SAP (si hay webservice disponible).
-- [ ] Reportes avanzados (cohortes, pronóstico, ranking).
-
-## Fase 3 — Expansión (opcional, a partir del mes 6)
-
-- [ ] Portal del cliente final.
-- [ ] App móvil nativa.
-- [ ] Multi-tenant para revender a otros fabricantes LatAm.
-- [ ] Internacionalización (Costa Rica, Venezuela, Colombia).
+## Fase 3 — Expansión (opcional)
+- [ ] Portal para distribuidores y franquicias con su categoría de precio.
+- [ ] App móvil nativa / modo sin conexión.
+- [ ] Multi-empresa (otros países del grupo).

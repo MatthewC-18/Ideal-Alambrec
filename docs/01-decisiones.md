@@ -25,3 +25,14 @@
 4. Manual de marca de Ideal Alambrec (logo oficial vectorial, paleta, tipografía).
 5. Lista maestra de precios 2026 vigente (hoy la tenemos en `CP_2026` del Excel; confirmar que es la correcta).
 6. Lista maestra de asesores vigente (dominios `@bekaert.com` + `@somosgrupoag.com` en transición).
+
+## Decisiones de la Fase 1 (construcción del piloto)
+
+| Tema | Decisión | Por qué |
+|---|---|---|
+| Arquitectura | Una sola app Next.js (pantallas + servidor) + PostgreSQL, sin API ni Redis separados. | Menos piezas para IT con ~30 usuarios; el motor de cálculo quedó independiente por si se separa después. |
+| Diferenciador | **Configuración sin programador**: precios, reglas de cálculo, usuarios, límites y textos se cambian desde la app, con borradores, simulador y versiones. | Es el problema de fondo: hoy cada cambio exige un Excel nuevo distribuido PC por PC. |
+| Ajuste de precios por el asesor | Permitido por línea, con tope por rol (asesor 5 %, supervisor 15 %, admin sin tope; editable). Queda marcado y auditado. | Da autonomía al asesor sin perder control. La aprobación por encima del tope es Fase 2. |
+| Errores del Excel | Se corrigen 3 errores de cálculo y se preguntan 3 dudas a Ideal (`07-hallazgos-excel.md`). | Cotizar “igual que el Excel” incluyendo sus errores no le sirve al cliente. |
+| Datos sensibles | Precios y datos de asesores se leen del Excel en la carga inicial; no se copian a archivos del repo. | El repositorio está público mientras no se cambie su visibilidad. |
+| Branding | Logo Ideal Alambrec + Grupo AG extraído del Excel; colores tomados del logo (#00AEEF, #003DA7, #294A8D). | Es la versión que ya usa el equipo comercial. |

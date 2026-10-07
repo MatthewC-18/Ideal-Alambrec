@@ -1,0 +1,28 @@
+# Piloto local para IT: `docker compose up --build` y abrir http://localhost:3000
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: cotizador
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cotizador}
+      POSTGRES_DB: cotizador
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cotizador"]
+      interval: 5s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://cotizador:${DB_PASSWORD:-cotizador}@db:5432/cotizador?schema=public
+
+volumes:
+  db-data:

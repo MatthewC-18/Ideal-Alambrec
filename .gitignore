@@ -27,3 +27,15 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Next / build
+next-env.d.ts
+*.tsbuildinfo
+.next/
+out/
+
+# Fixtures generated from the confidential Excel (prices) — never commit
+tests/fixtures/*.local.json
+
+# Local uploads / generated PDFs
+storage/
