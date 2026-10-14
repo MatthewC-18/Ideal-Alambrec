@@ -30,6 +30,7 @@ Para que el resultado sea idéntico, el cotizador replica también la aritmétic
 | 7 | Urbana con púas agrega los brazos, pero **no el alambre de púas** (las celdas que lo calcularían apuntan a filas que no existen). | Se replicó igual que el Excel. | **Pregunta para Ideal:** ¿Urbana con púas debe incluir el alambre? Si sí, se agrega desde Configuración → Reglas sin programar. |
 | 8 | Intradomiciliaria siempre suma **1 kit de puerta**, sin importar la longitud. | Se replicó igual (es un parámetro editable: `puertas`). | **Pregunta para Ideal:** confirmar si es intencional. |
 | 9 | Máxima Seguridad: el kit de poste de 3,60 m (PVS $103,50) es más barato que el de 3,00 m ($167,71). | Se usan los precios tal como vienen en la lista. | **Pregunta para Ideal:** revisar si es un error de la lista CP_2026. |
+| 10 | Máxima Seguridad **ignora la opción de púas**: la hoja de salida tiene líneas de brazos y fijación jumbo, pero apuntan a celdas vacías de `Calculo`. Con Púas = S o N el total es idéntico (verificado en LibreOffice, 130 m a 2,45 m). | No ofrece la opción de púas en Máxima Seguridad (mismo resultado que el Excel). Si hace falta alambre, se agrega con *Agregar productos*. | **Pregunta para Ideal:** ¿Máxima Seguridad se vende con púas? Si sí, ¿con qué brazo y cuántas hileras? Se activa desde Configuración → Reglas sin programar. |
 
 ## Diferencias de diseño (mejoras, no errores)
 
