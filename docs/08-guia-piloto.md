@@ -110,7 +110,7 @@ Detalle normal, igual en ambos: en **PVS** el precio unitario se muestra con 2 d
 - [ ] `NEXTAUTH_SECRET` largo y aleatorio; `NEXTAUTH_URL` con el dominio final.
 - [ ] Correo saliente: `SMTP_*` (Microsoft 365 o el relay que defina IT). Sin esto los envíos quedan como “simulado”.
 - [ ] Respaldos automáticos de PostgreSQL (diarios, retención mínima 7 días).
-- [ ] Revisar con Ideal las 4 preguntas abiertas de `docs/07-hallazgos-excel.md`.
+- [ ] Revisar con Ideal las 5 preguntas abiertas de `docs/07-hallazgos-excel.md`.
 - [ ] Borrar datos de demostración y desactivar las cuentas `@piloto.local`.
 - [ ] Hacer el repositorio **privado** (contiene la lista de precios con costos y datos de asesores).
 
