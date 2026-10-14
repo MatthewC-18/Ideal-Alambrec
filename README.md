@@ -16,7 +16,7 @@ npm run db:seed                   # lista CP_2026 + asesores desde legacy/*.xlsm
 npm run dev                       # http://localhost:3000
 ```
 
-Con Docker: `cp .env.example .env && docker compose up --build`.
+Con Docker: `docker compose up --build` y abrir http://localhost:3000 (sin `.env` usa los valores del piloto, PIN `2026`).
 
 Cuentas de prueba (correo + `PILOT_PIN`): `admin@piloto.local`, `supervisor@piloto.local`, `asesor@piloto.local`, `gerencia@piloto.local`. Guion de demo y checklist para producción en [`docs/08-guia-piloto.md`](docs/08-guia-piloto.md).
 

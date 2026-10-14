@@ -14,15 +14,23 @@
 
 ## Cómo levantarlo
 
-### Opción A — Docker (recomendada para IT)
+### Opción A — Docker (la más sencilla)
+
+1. Instala [Docker Desktop](https://www.docker.com/products/docker-desktop/) y ábrelo (en Windows pide reiniciar la primera vez).
+2. Descarga el código de la rama `claude/serene-thompson-qc63n0` (en GitHub: elige esa rama → **Code → Download ZIP**) y descomprímelo.
+3. Abre una terminal en esa carpeta (Windows: clic derecho dentro de la carpeta → *Abrir en Terminal*) y ejecuta:
 
 ```bash
-cp .env.example .env          # cambia NEXTAUTH_SECRET y PILOT_PIN
 docker compose up --build     # crea la base, carga precios y asesores del Excel, y arranca
-# abrir http://localhost:3000
 ```
 
-> Probado el 14-10-2026 con `docker compose up --build`: aplica las migraciones, carga la lista de precios, los asesores y los datos de demostración, y la cotización y el PDF funcionan. La primera construcción tarda unos minutos.
+4. Cuando aparezca `Ready`, abre http://localhost:3000.
+
+La primera vez tarda varios minutos (descarga e instala todo); las siguientes basta `docker compose up`. Para apagarlo: `Ctrl + C`. Para borrar todo y empezar de cero: `docker compose down -v`.
+
+No hace falta crear un `.env`: usa los valores del piloto (PIN `2026`). Para cambiar el PIN, el secreto de sesión, el correo o el SSO, copia `.env.example` como `.env` y edítalo.
+
+> Probado el 14-10-2026 con `docker compose up --build`: aplica las migraciones, carga la lista de precios, los asesores y los datos de demostración, y la cotización y el PDF funcionan.
 
 ### Opción B — Node + PostgreSQL
 

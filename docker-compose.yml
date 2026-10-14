@@ -1,4 +1,6 @@
-# Piloto local para IT: `docker compose up --build` y abrir http://localhost:3000
+# Piloto local: `docker compose up --build` y abrir http://localhost:3000
+# Funciona sin archivo .env (valores de piloto por defecto). Si existe un .env junto a este archivo,
+# sus valores reemplazan a los de abajo.
 services:
   db:
     image: postgres:16
@@ -20,9 +22,24 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
-    env_file: .env
     environment:
       DATABASE_URL: postgresql://cotizador:${DB_PASSWORD:-cotizador}@db:5432/cotizador?schema=public
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-piloto-local-cambiar-en-produccion}
+      AZURE_AD_CLIENT_ID: ${AZURE_AD_CLIENT_ID:-}
+      AZURE_AD_CLIENT_SECRET: ${AZURE_AD_CLIENT_SECRET:-}
+      AZURE_AD_TENANT_ID: ${AZURE_AD_TENANT_ID:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      PILOT_LOGIN: ${PILOT_LOGIN:-true}
+      PILOT_PIN: ${PILOT_PIN:-2026}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-Cotizador Ideal Alambrec <cotizaciones@ejemplo.com>}
+      SEED_EXCEL_PATH: ${SEED_EXCEL_PATH:-legacy/Cotizador_PRO_V6R02-2026.xlsm}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
 
 volumes:
   db-data:
