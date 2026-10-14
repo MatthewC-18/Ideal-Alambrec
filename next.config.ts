@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   poweredByHeader: false,
   serverExternalPackages: ["@react-pdf/renderer", "exceljs"],
   experimental: {

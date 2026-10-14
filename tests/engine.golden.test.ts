@@ -1,8 +1,8 @@
-// Compares the web engine against the legacy Excel, recalculated in LibreOffice for 285 input combinations.
+// Compares the web engine against the legacy Excel, recalculated in LibreOffice for hundreds of input combinations.
 // The fixture holds real prices, so it is gitignored; generate it with `npm run golden`.
 import { existsSync, readFileSync } from "fs";
 import { describe, expect, it } from "vitest";
-import { calculateQuote } from "@/lib/engine/engine";
+import { calculateQuote, round2 } from "@/lib/engine/engine";
 import { DEFAULT_RULES } from "@/lib/engine/default-rules";
 import type { PriceBook } from "@/lib/engine/types";
 import { loadWorkbook, parsePriceList } from "@/lib/import/excel";
@@ -15,7 +15,11 @@ type GoldenCase = {
   input: { tipo: string; L: number; altura: number; placa: "S" | "N"; puas: "S" | "N"; incl: number; tier: string; dl: number; dp: number };
   lines: { code: number | string; qty: number; price: number; total: number }[];
   subtotal: number;
+  iva: number;
+  total: number;
 };
+
+const ROLLS: Record<string, number> = { "188057": 500, "188055": 400, "188051": 300, "188053": 200 };
 
 const SYSTEM_KEY: Record<string, string> = {
   PERIMETRAL: "PERIMETRAL",
@@ -59,75 +63,75 @@ describe.skipIf(!enabled)("motor vs Excel original (golden)", async () => {
     if (inp.tipo === "URBANA" && inp.placa === "S") return;
     expect(res.messages.filter((m) => m.level === "error")).toEqual([]);
 
-    const mine = new Map<string, { qty: number; price: number }>();
+    const mine = new Map<string, { qty: number; price: number; total: number }>();
     for (const l of res.lines) {
-      const prev = mine.get(l.sap!);
-      mine.set(l.sap!, prev ? { qty: prev.qty + l.qty, price: l.unitPrice } : { qty: l.qty, price: l.unitPrice });
+      expect(mine.has(l.sap!), `SAP ${l.sap} repetido`).toBe(false);
+      mine.set(l.sap!, { qty: l.qty, price: l.unitPrice, total: l.total });
     }
-
-    const excel = new Map<string, { qty: number; price: number | null }>();
-    let combinedQty = 0;
+    // Excel codes: "189168 / 189483" for stacked panels, numbers stored as floats.
+    const excel = new Map<string, { qty: number; price: number; total: number }>();
     for (const l of c.lines) {
       if (l.code === null || l.code === "" || l.code === 0) continue;
-      const parts = String(l.code).split("/").map((s) => String(Math.trunc(Number(s.trim()))));
-      if (parts.length > 1) combinedQty += l.qty;
-      for (const sap of parts) {
-        const prev = excel.get(sap);
-        excel.set(sap, { qty: (prev?.qty ?? 0) + l.qty, price: parts.length > 1 ? null : l.price });
-      }
+      const sap = String(l.code).split("/").map((s) => String(Math.trunc(Number(s.trim())))).join(" / ");
+      expect(excel.has(sap), `Excel repite ${sap}`).toBe(false);
+      excel.set(sap, { qty: l.qty, price: l.price, total: l.total });
     }
 
     const puasNoAplica = inp.tipo === "PERIMETRAL" && inp.puas === "S" && inp.altura < 1.2;
     const postes = (res.segments[0].variables.find((v) => v.name === "postes")?.value as number) ?? 0;
-    const isRoll = (sap: string) => ["188057", "188055", "188051", "188053", "188072"].includes(sap);
-    let rollsDiffer = false;
+    // What the Excel would charge for the same lines: start from the web amounts and undo the documented fixes.
+    let excelEquivalent = res.lines.reduce((s, l) => s + l.qty * l.unitPrice, 0);
+    let documented = false;
 
     for (const [sap, e] of excel) {
-      if (isRoll(sap)) continue;
+      if (ROLLS[sap]) continue;
       const m = mine.get(sap);
       expect(m, `SAP ${sap} falta en el motor`).toBeDefined();
+      expect(m!.price, `precio SAP ${sap}`).toBe(e.price);
       if (puasNoAplica && (sap === "270501" || sap === "270504")) {
         // Fix 2: at 1.11 m the Excel adds one extra bolt+nut per post for barbed-wire arms that are never quoted.
         expect(e.qty - m!.qty).toBe(postes);
-        note("1,11 m con púas: Excel sumaba pernos/tuercas de brazos inexistentes");
+        excelEquivalent += postes * e.price;
+        documented = true;
       } else {
         expect(m!.qty, `cantidad SAP ${sap}`).toBe(e.qty);
-      }
-      if (e.price !== null) {
-        if (inp.tier === "PVS") expect(Math.abs(m!.price - e.price)).toBeLessThan(0.0051);
-        else expect(m!.price, `precio SAP ${sap}`).toBe(e.price);
+        expect(m!.total, `total línea SAP ${sap}`).toBe(round2(e.total));
       }
     }
+    if (puasNoAplica) note("1,11 m con púas: Excel sumaba pernos/tuercas de brazos inexistentes");
     for (const [sap] of mine) {
-      if (isRoll(sap)) continue;
+      if (ROLLS[sap]) continue;
       expect(excel.has(sap), `SAP ${sap} sobra en el motor`).toBe(true);
     }
 
-    // Barbed-wire rolls: Excel shows a single roll line (max code / max count) and its greedy mix can under-cover.
-    const excelRolls = [...excel].filter(([s]) => isRoll(s));
-    const myRolls = [...mine].filter(([s]) => isRoll(s));
-    const meters = (r: [string, { qty: number }][]) =>
-      r.reduce((s, [sap, v]) => s + v.qty * ({ "188057": 500, "188055": 400, "188051": 300, "188053": 200, "188072": 100 } as Record<string, number>)[sap], 0);
+    // Barbed-wire rolls: same choice as the Excel, which then prints a single line (highest code, highest count).
+    const excelRolls = [...excel].filter(([s]) => ROLLS[s]);
+    const myRolls = [...mine].filter(([s]) => ROLLS[s]);
     if (myRolls.length > 0) {
-      expect(meters(myRolls)).toBeGreaterThanOrEqual(inp.L * 3);
-      if (JSON.stringify(excelRolls.map(([s, v]) => [s, v.qty])) !== JSON.stringify(myRolls.map(([s, v]) => [s, v.qty]))) {
-        rollsDiffer = true;
-        note("rollos de púas: Excel elegía combinación incompleta");
+      expect(myRolls.reduce((s, [sap, v]) => s + v.qty * ROLLS[sap], 0)).toBeGreaterThanOrEqual(inp.L * 3);
+      const shown = [String(Math.max(...myRolls.map(([s]) => Number(s)))), Math.max(...myRolls.map(([, v]) => v.qty))] as const;
+      expect(excelRolls.map(([s, v]) => [s, v.qty])).toEqual([shown]);
+      expect(mine.get(shown[0])!.price).toBe(excelRolls[0][1].price);
+      if (myRolls.length > 1) {
+        // Fix 3: the Excel leaves out the other roll sizes of the chosen mix (and their meters).
+        excelEquivalent += excelRolls[0][1].qty * excelRolls[0][1].price - myRolls.reduce((s, [, v]) => s + v.qty * v.price, 0);
+        documented = true;
+        note("rollos de púas: Excel mostraba un solo tipo de rollo");
       }
     } else expect(excelRolls.length).toBe(0);
 
-    // Totals: allow per-unit rounding differences (combined panel line, unrounded PVS) and roll fixes.
-    const unitTol = (inp.tier === "PVS" ? 0.005 * res.lines.reduce((s, l) => s + l.qty, 0) : 0) + 0.01 * combinedQty + 0.011;
-    const extraBolts = puasNoAplica
-      ? postes * ((excel.get("270501")?.price ?? 0) + (excel.get("270504")?.price ?? 0))
-      : 0;
-    if (!rollsDiffer) {
-      expect(Math.abs(res.subtotal + extraBolts - c.subtotal), `subtotal (Excel ${c.subtotal}, motor ${res.subtotal})`).toBeLessThanOrEqual(unitTol);
+    // Totals to the cent, as the Excel displays them.
+    expect(round2(excelEquivalent), "subtotal").toBe(round2(c.subtotal));
+    expect(round2(excelEquivalent * 1.15), "total con IVA").toBe(round2(c.total));
+    if (!documented) {
+      expect(res.subtotal).toBe(round2(c.subtotal));
+      expect(res.iva).toBe(round2(c.iva));
+      expect(res.total).toBe(round2(c.total));
+      report.exact++;
     }
-    if (!puasNoAplica && !rollsDiffer && combinedQty === 0 && inp.tier !== "PVS") report.exact++;
   });
 
   it("resumen", () => {
-    console.log("Coincidencias exactas:", report.exact, "· Diferencias documentadas:", report.documented);
+    console.log(`Casos: ${cases.length} · idénticos al centavo: ${report.exact} · diferencias documentadas:`, report.documented);
   });
 });

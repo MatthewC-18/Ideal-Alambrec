@@ -22,7 +22,7 @@ docker compose up --build     # crea la base, carga precios y asesores del Excel
 # abrir http://localhost:3000
 ```
 
-> Nota: el `Dockerfile` y el `docker-compose.yml` se escribieron pero **no se pudieron ejecutar en el entorno donde se construyó el piloto** (no tenía Docker). Verificarlos en la primera prueba de IT.
+> Probado el 14-10-2026 con `docker compose up --build`: aplica las migraciones, carga la lista de precios, los asesores y los datos de demostración, y la cotización y el PDF funcionan. La primera construcción tarda unos minutos.
 
 ### Opción B — Node + PostgreSQL
 
@@ -35,6 +35,16 @@ npx prisma migrate deploy            # crea las tablas
 npm run db:seed                      # importa lista CP_2026 y asesores del Excel + datos demo
 npm run build && npm start           # http://localhost:3000
 ```
+
+### Actualizar una instalación que ya estaba levantada
+
+```bash
+git pull
+npm ci && npx prisma migrate deploy && npm run db:seed && npm run build && npm start
+# con Docker basta con: docker compose up --build
+```
+
+La carga inicial (`db:seed`) actualiza sola las reglas de cálculo iniciales y los decimales del PVS si nadie publicó reglas propias; no toca precios ni reglas que un supervisor haya cambiado.
 
 ## Cuentas de prueba (modo piloto)
 
@@ -62,6 +72,27 @@ Las cotizaciones `DEMO-…` y los clientes “(demo)” son **ficticios** y exis
 7. **Configuración → Reglas de cálculo → Crear borrador** → cambiar `fijPorPoste` de 2,08 m a 6 → el simulador muestra la diferencia contra la versión vigente → *Guardar y validar* → *Publicar*.
 8. **Auditoría:** cada paso anterior aparece con usuario, fecha e IP.
 9. Cerrar con `docs/07-hallazgos-excel.md`: los errores del Excel que el sistema corrige.
+
+> Antes de la demo, si se cambiaron reglas o precios durante pruebas, vuelve a la versión inicial desde *Configuración → Reglas de cálculo* (restaurar v1) y *Listas de precios*, para que la prueba contra el Excel use los mismos datos.
+
+## Prueba lado a lado con el Excel
+
+Con las mismas entradas, el cotizador da **el mismo total que el Excel, al centavo** (líneas, subtotal, IVA y total). Para comparar:
+
+| En el Excel (hoja `Ingreso`) | En el cotizador |
+|---|---|
+| Tipo de cerca, longitud, altura | Sistema, *Longitud total*, *Altura* |
+| Poste placa/plinto, púas, inclinación | *Tipo de poste*, *Seguridad superior*, *Terreno* (al elegir *Escalonado* aparece el campo de % de inclinación: pon el mismo % que en el Excel) |
+| Categoría del cliente (`H22`) | *Categoría de precio* (viene del cliente; se puede cambiar) |
+| Descuento livianos (`H28`) | *Descuento livianos (alambre)*, aparece cuando hay púas |
+
+Diferencias **a propósito** (errores del Excel, detalle en `07-hallazgos-excel.md`):
+
+1. **Perimetral 3,05 m o 4,02 m con placa:** el Excel dice “NO SE DISPONE ESTA OPCIÓN” pero igual da un total (sin postes). El cotizador no deja cotizarlo.
+2. **Perimetral 1,11 m con púas:** el Excel dice “NO APLICA OPCIÓN CON PÚAS” pero cobra un perno y una tuerca extra por poste. El cotizador no los cobra.
+3. **Con púas, en algunas longitudes** (p. ej. 201–233 m o 334–400 m): el Excel elige dos tamaños de rollo pero imprime y cobra solo uno. El cotizador cotiza los dos. Ej.: 350 m → el Excel muestra 2 × 500 m (1.000 m) cuando se necesitan 1.050 m.
+
+Detalle normal, igual en ambos: en **PVS** el precio unitario se muestra con 2 decimales, pero el total de la línea usa el PVS completo, así que “cantidad × precio mostrado” puede diferir en centavos del total de la línea. El Excel hace lo mismo.
 
 ## Checklist para pasar a producción (con IT)
 

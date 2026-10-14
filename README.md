@@ -27,7 +27,7 @@ Cuentas de prueba (correo + `PILOT_PIN`): `admin@piloto.local`, `supervisor@pilo
 | `npm run dev` | Servidor de desarrollo |
 | `npm run build && npm start` | Producción |
 | `npm test` | Pruebas del motor (las comparaciones contra el Excel corren si existe el fixture local) |
-| `npm run golden` | Recalcula el Excel original en LibreOffice con 285 combinaciones y guarda el fixture (gitignored, contiene precios) |
+| `npm run golden` | Recalcula el Excel original en LibreOffice con 394 combinaciones y guarda el fixture (gitignored, contiene precios) |
 | `npm run lint` / `npm run typecheck` | Calidad de código |
 | `npm run db:seed` | Carga inicial (idempotente). `SEED_RESET_DEMO=true` regenera solo los datos demo |
 

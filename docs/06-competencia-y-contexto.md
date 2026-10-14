@@ -59,7 +59,7 @@ El catálogo CercasPro 2021 de **Proalco (Bekaert Colombia)** menciona una aplic
 
 ## 7. Argumentos de venta hacia Ideal (verificables)
 
-1. **“Cotiza igual que su Excel, pero sin sus errores”** — 285 casos comparados contra el Excel original; 9 hallazgos documentados (`07-hallazgos-excel.md`).
+1. **“Cotiza igual que su Excel, pero sin sus errores”** — 394 casos comparados contra el Excel original, idénticos al centavo salvo 3 errores del Excel; 9 hallazgos documentados (`07-hallazgos-excel.md`).
 2. **“Cambian precios y reglas ustedes mismos”** — lista nueva desde Excel, ajuste masivo por %, reglas con simulador; sin redistribuir archivos.
 3. **“Saben quién hizo qué”** — SSO corporativo + auditoría que ni un administrador puede borrar.
 4. **“Precios y reglas versionados”** — cada cotización guarda la lista y las reglas con que se hizo.

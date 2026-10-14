@@ -15,9 +15,31 @@ import type {
 
 export const round2 = (x: number) => excelRound(x, 2);
 
+// Same as the Excel: a category price is ROUND(PVS × (1 − %), 2), but the PVS category (0 %) uses the list
+// value unrounded; livianos/pesados are always rounded (Calculo!CL36).
 export function priceFor(pvs: number, mode: PricingMode, book: PriceBook, input: Pick<QuoteInput, "descLivianos" | "descPesados">): number {
+  if (mode === "tier" && book.tierPct === 0) return pvs;
   const pct = mode === "tier" ? book.tierPct : mode === "livianos" ? input.descLivianos : mode === "pesados" ? input.descPesados : 0;
   return round2(pvs * (1 - pct));
+}
+
+// "189168 / 189483" quotes two products as one unit, like the Excel's 3,05 m and 4,02 m panels:
+// the price is the category price of the summed PVS, not the sum of rounded prices.
+export function resolveProduct(sap: string, book: PriceBook): { sap: string; name: string; pvs: number; weightKg: number } | { missing: string } {
+  const parts = sap.split("/").map((s) => s.trim()).filter(Boolean);
+  const found: PriceBook["products"][string][] = [];
+  for (const code of parts) {
+    const p = book.products[code];
+    if (!p) return { missing: code };
+    found.push(p);
+  }
+  if (found.length === 1) return { sap: parts[0], ...found[0] };
+  return {
+    sap: parts.join(" / "),
+    name: found.map((p) => p.name).join(" + "),
+    pvs: found.reduce((s, p) => s + p.pvs, 0),
+    weightKg: found.reduce((s, p) => s + p.weightKg, 0),
+  };
 }
 
 export function findHeight(system: SystemRule, height: number) {
@@ -104,9 +126,9 @@ function evalSegment(
 
   const raw: RawLine[] = [];
   const addProduct = (sap: string, qty: number, rule: { id: string; section: "principal" | "adicionales"; pricing: PricingMode }) => {
-    const p = book.products[sap];
-    if (!p) {
-      push("error", `El producto SAP ${sap} no está en la lista de precios vigente.`);
+    const p = resolveProduct(sap, book);
+    if ("missing" in p) {
+      push("error", `El producto SAP ${p.missing} no está en la lista de precios vigente.`);
       return;
     }
     raw.push({
@@ -114,7 +136,7 @@ function evalSegment(
       section: rule.section,
       source: "regla",
       ruleLineId: rule.id,
-      sap,
+      sap: p.sap,
       description: p.name,
       calcQty: qty,
       unitPvs: p.pvs,
@@ -155,6 +177,13 @@ function mergeRaw(raw: RawLine[]): RawLine[] {
   return out;
 }
 
+const rawSum = (lines: Pick<CalcLine, "qty" | "unitPrice">[]) => lines.reduce((s, l) => s + l.qty * l.unitPrice, 0);
+
+// A typed price equal to the list price at cents (e.g. 0,88 for an unrounded PVS of 0,8792) is not an adjustment.
+export function isPriceOverride(price: number | undefined, listPrice: number): boolean {
+  return price !== undefined && price >= 0 && round2(price) !== round2(listPrice);
+}
+
 export function overrideKey(section: string, sap: string) {
   return `${section}:${sap}`;
 }
@@ -172,7 +201,7 @@ export function calculateQuote(rules: RuleSetData, book: PriceBook, input: Quote
       const key = overrideKey(raw.section, raw.sap!);
       const ov = seg.overrides?.[key];
       const qty = ov?.qty !== undefined && ov.qty >= 0 ? ov.qty : raw.calcQty;
-      const unitPrice = ov?.unitPrice !== undefined && ov.unitPrice >= 0 ? round2(ov.unitPrice) : raw.listPrice!;
+      const unitPrice = isPriceOverride(ov?.unitPrice, raw.listPrice!) ? round2(ov!.unitPrice!) : raw.listPrice!;
       lines.push({
         ...raw,
         key: `s${index}:${key}`,
@@ -183,7 +212,7 @@ export function calculateQuote(rules: RuleSetData, book: PriceBook, input: Quote
         qtyOverride: qty !== raw.calcQty,
       });
     }
-    r.result.subtotal = round2(lines.filter((l) => l.segmentIndex === index).reduce((s, l) => s + l.total, 0));
+    r.result.subtotal = round2(rawSum(lines.filter((l) => l.segmentIndex === index)));
   });
 
   for (const ex of input.extras) {
@@ -195,7 +224,7 @@ export function calculateQuote(rules: RuleSetData, book: PriceBook, input: Quote
         continue;
       }
       const listPrice = priceFor(p.pvs, "tier", book, input);
-      const unitPrice = ex.unitPrice !== undefined && ex.unitPrice >= 0 ? round2(ex.unitPrice) : listPrice;
+      const unitPrice = isPriceOverride(ex.unitPrice, listPrice) ? round2(ex.unitPrice!) : listPrice;
       lines.push({
         key: `x:${ex.id}`,
         segmentIndex: null,
@@ -246,11 +275,16 @@ export function calculateQuote(rules: RuleSetData, book: PriceBook, input: Quote
     messages.push({ level: "error", message: "Agrega al menos un cerramiento o un producto.", segmentIndex: null });
   }
 
-  const subtotal = round2(lines.reduce((s, l) => s + l.total, 0));
-  const discountTotal = round2(subtotal * input.globalDiscountPct);
-  const taxable = round2(subtotal - discountTotal);
-  const iva = round2(taxable * input.ivaRate);
-  const total = round2(taxable + iva);
+  // Like the Excel's Salida sheet, sums use unrounded line amounts and only the displayed figures are rounded.
+  const subtotalRaw = rawSum(lines);
+  const discountRaw = subtotalRaw * input.globalDiscountPct;
+  const taxableRaw = subtotalRaw - discountRaw;
+  const ivaRaw = taxableRaw * input.ivaRate;
+  const subtotal = round2(subtotalRaw);
+  const discountTotal = round2(discountRaw);
+  const taxable = round2(taxableRaw);
+  const iva = round2(ivaRaw);
+  const total = round2(taxableRaw + ivaRaw);
   const weightKg = Math.round(lines.reduce((s, l) => s + l.qty * l.weightKg, 0) * 1000) / 1000;
   return {
     lines,

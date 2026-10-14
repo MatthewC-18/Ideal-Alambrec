@@ -102,7 +102,7 @@ model PriceListItem {
   priceList   PriceList @relation(fields: [priceListId], references: [id], onDelete: Cascade)
   productId   String
   product     Product   @relation(fields: [productId], references: [id])
-  pvs         Decimal   @db.Decimal(16, 6)
+  pvs         Decimal   @db.Decimal(20, 10)
 
   @@unique([priceListId, productId])
 }

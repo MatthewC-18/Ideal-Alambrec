@@ -75,6 +75,20 @@ for L in [10, 49, 130, 600]:
     for h in [2.1, 2.45, 3]:
         for incl in [0, 0.1]:
             cases.append(dict(tipo="MAXIMA SEGURIDAD", L=L, altura=h, placa="N", puas="N", incl=incl, tier=random.choice(TIERS), dl=0, dp=0))
+# Barbed-wire rolls depend only on the length: sweep the ranges where the roll mix changes.
+for L in [1, 5, 33, 50, 66.5, 67, 75, 99, 100, 101, 133, 134, 150, 166.5, 167, 175, 200, 201, 225, 233, 234, 250, 266, 267,
+          275, 300, 301, 333, 334, 350, 366, 367, 400, 401, 433, 450, 466, 467, 500, 533, 534, 550, 600, 633, 634, 666,
+          700, 701, 750, 800, 866, 867, 900, 966, 967, 1000, 1100, 1500, 2000]:
+    cases.append(dict(tipo="PERIMETRAL", L=L, altura=random.choice([2.08, 2.4]), placa=random.choice("NS"), puas="S", incl=0,
+                      tier=random.choice(TIERS), dl=random.choice([0, 0.1, 0.2]), dp=0))
+# PVS category: unrounded list prices make every system and height worth checking to the cent.
+for L in [7.5, 45, 87.5, 333, 1000]:
+    for h in [1.11, 2.08, 2.4, 3.05, 4.02]:
+        cases.append(dict(tipo="PERIMETRAL", L=L, altura=h, placa="N", puas=random.choice("NS"), incl=random.choice([0, 0.1]), tier="PVS", dl=0, dp=0))
+    cases.append(dict(tipo="URBANA", L=L, altura=2.08, placa="N", puas=random.choice("NS"), incl=0, tier="PVS", dl=0, dp=0))
+    cases.append(dict(tipo="INTRADOMICILIARIA", L=L, altura=1.25, placa="N", puas="N", incl=0, tier="PVS", dl=0, dp=0))
+    for h in [2.1, 2.45, 3]:
+        cases.append(dict(tipo="MAXIMA SEGURIDAD", L=L, altura=h, placa="N", puas="N", incl=0, tier="PVS", dl=0, dp=0))
 
 out = []
 for cs in cases:

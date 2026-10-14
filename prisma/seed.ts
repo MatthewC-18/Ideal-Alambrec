@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "fs";
+import { isDeepStrictEqual } from "util";
 import { PrismaClient, type QuoteStatus, type Role } from "@prisma/client";
 import { calculateQuote } from "../src/lib/engine/engine";
 import { DEFAULT_RULES } from "../src/lib/engine/default-rules";
@@ -103,13 +104,40 @@ async function main() {
     console.log(`Lista de precios: ${pl.products.length} productos, ${pl.tiers.length} categorías`);
   }
 
+  // Lists stored before PVS kept 10 decimals were rounded to 6; restore the Excel's exact values
+  // (only differences that small, so prices edited by a supervisor are never touched).
+  if (priceList.source?.startsWith("Excel ")) {
+    const exact = new Map(parsePriceList(wb).products.map((p) => [p.sap, p.pvs]));
+    const fixes = priceList.items.filter((i) => {
+      const d = Math.abs(Number(i.pvs) - (exact.get(i.product.sap) ?? Number(i.pvs)));
+      return d > 1e-9 && d < 1e-6;
+    });
+    for (const i of fixes) await prisma.priceListItem.update({ where: { id: i.id }, data: { pvs: exact.get(i.product.sap)! } });
+    if (fixes.length) console.log(`Lista de precios: ${fixes.length} PVS con todos los decimales del Excel`);
+  }
+
   // Rules
+  const SEED_RULES_NOTE = "Reglas transcritas del Cotizador PRO V6R02-2026 (hoja Calculo).";
   let ruleSet = await prisma.ruleSet.findFirst({ where: { status: "VIGENTE" } });
   if (!ruleSet) {
     ruleSet = await prisma.ruleSet.create({
-      data: { version: 1, status: "VIGENTE", data: DEFAULT_RULES, notes: "Reglas transcritas del Cotizador PRO V6R02-2026 (hoja Calculo).", createdById: admin.id, publishedAt: new Date() },
+      data: { version: 1, status: "VIGENTE", data: DEFAULT_RULES, notes: SEED_RULES_NOTE, createdById: admin.id, publishedAt: new Date() },
     });
     console.log("Reglas de cálculo v1 publicadas");
+  } else if (ruleSet.notes?.startsWith("Reglas transcritas del Cotizador") && !isDeepStrictEqual(ruleSet.data, JSON.parse(JSON.stringify(DEFAULT_RULES)))) {
+    // Nobody has published their own rules yet: bring the seeded ones up to date as a new version.
+    const last = await prisma.ruleSet.aggregate({ _max: { version: true } });
+    const version = (last._max.version ?? 0) + 1;
+    const notes = `${SEED_RULES_NOTE} Paneles de 3,05/4,02 m como una sola línea, igual que el Excel.`;
+    ruleSet = await prisma.$transaction(async (tx) => {
+      await tx.ruleSet.updateMany({ where: { status: "VIGENTE" }, data: { status: "ARCHIVADA" } });
+      const rs = await tx.ruleSet.create({ data: { version, status: "VIGENTE", data: DEFAULT_RULES, notes, createdById: admin.id, publishedAt: new Date() } });
+      await tx.auditLog.create({
+        data: { userId: admin.id, userEmail: admin.email, action: "publicar", entity: "ReglasCalculo", entityId: rs.id, summary: `Actualizó las reglas iniciales a v${version}: ${notes}` },
+      });
+      return rs;
+    });
+    console.log(`Reglas de cálculo v${version} publicadas (actualización de las reglas iniciales)`);
   }
 
   if (process.env.SEED_DEMO_DATA !== "true") return;

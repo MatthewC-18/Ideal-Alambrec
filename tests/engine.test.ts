@@ -42,13 +42,18 @@ describe("expresiones", () => {
 
 describe("rollos de alambre de púas", () => {
   const R = [500, 400, 300, 200].map((m) => ({ meters: m, sku: String(m) }));
-  it("cubre siempre los metros requeridos con el menor desperdicio y menos rollos", () => {
+  const pick = (need: number) => Object.fromEntries(pickRolls(need, R).map((r) => [r.meters, r.count]));
+  it("cubre siempre los metros requeridos", () => {
     for (let need = 1; need <= 6000; need += 7) {
-      const pick = pickRolls(need, R);
-      expect(pick.reduce((s, r) => s + r.meters * r.count, 0)).toBeGreaterThanOrEqual(need);
+      expect(pickRolls(need, R).reduce((s, r) => s + r.meters * r.count, 0)).toBeGreaterThanOrEqual(need);
     }
-    expect(pickRolls(390, R)).toEqual([{ sku: "400", meters: 400, count: 1 }]);
-    expect(pickRolls(3750, R)).toEqual([{ sku: "500", meters: 500, count: 7 }, { sku: "300", meters: 300, count: 1 }]);
+  });
+  it("elige la misma combinación que el Excel", () => {
+    expect(pick(390)).toEqual({ 400: 1 }); // 130 m
+    expect(pick(750)).toEqual({ 400: 2 }); // 250 m
+    expect(pick(900)).toEqual({ 300: 3 }); // 300 m
+    expect(pick(1050)).toEqual({ 500: 2, 200: 1 }); // 350 m: el Excel muestra solo 2 × 500 m
+    expect(pick(3750)).toEqual({ 200: 19 }); // 1.250 m
   });
 });
 
@@ -79,7 +84,7 @@ describe("reglas por defecto", () => {
 
   it("Perimetral 4,02 m usa dos paneles por tramo y bloquea placa", () => {
     const ok = calculateQuote(DEFAULT_RULES, book, { ...base, segments: [{ systemKey: "PERIMETRAL", length: 50, height: 4.02, placa: false, puas: true, incl: 0 }] });
-    expect(qtyOf(ok, "189483")).toBe(40);
+    expect(qtyOf(ok, "189483 / 189483")).toBe(20); // una línea por tramo con los dos paneles, como el Excel
     expect(qtyOf(ok, "270512")).toBe(21); // brazos
     expect(qtyOf(ok, "189162")).toBe(63); // fijación jumbo
     expect(qtyOf(ok, "270503")).toBe(21 * 9 + 21);
@@ -113,9 +118,38 @@ describe("precios, ajustes y totales", () => {
       segments: [{ systemKey: "URBANA", length: 10, height: 2.08, placa: false, puas: false, incl: 0 }],
     });
     for (const l of res.lines) expect(l.unitPrice).toBe(excelRound(l.unitPvs! * 0.9, 2));
+    const taxable = res.subtotal * 0.95;
     expect(res.discountTotal).toBe(excelRound(res.subtotal * 0.05, 2));
-    expect(res.iva).toBe(excelRound((res.subtotal - res.discountTotal) * 0.15, 2));
-    expect(res.total).toBe(excelRound(res.subtotal - res.discountTotal + res.iva, 2));
+    expect(res.iva).toBe(excelRound(taxable * 0.15, 2));
+    expect(res.total).toBe(excelRound(taxable * 1.15, 2));
+  });
+
+  it("como el Excel: PVS sin redondear, totales sobre importes sin redondear y paneles dobles como una unidad", () => {
+    const pvsBook: PriceBook = {
+      tierPct: 0,
+      products: { ...book.products, "270501": { name: "Perno", pvs: 0.87654321987, weightKg: 0.02 } },
+    };
+    const res = calculateQuote(DEFAULT_RULES, pvsBook, { ...base, segments: [{ systemKey: "PERIMETRAL", length: 130, height: 2.08, placa: false, puas: false, incl: 0 }] });
+    const perno = res.lines.find((l) => l.sap === "270501")!;
+    expect(perno.unitPrice).toBe(0.87654321987);
+    expect(perno.total).toBe(232.28); // 265 × 0,876543… (con el precio redondeado serían 233,20)
+    const raw = res.lines.reduce((s, l) => s + l.qty * l.unitPrice, 0);
+    expect(res.subtotal).toBe(excelRound(raw, 2));
+    expect(res.total).toBe(excelRound(raw * 1.15, 2));
+
+    const tier = calculateQuote(DEFAULT_RULES, book, { ...base, segments: [{ systemKey: "PERIMETRAL", length: 10, height: 3.05, placa: false, puas: false, incl: 0 }] });
+    const panel = tier.lines.find((l) => l.sap === "189168 / 189483")!;
+    expect(panel.unitPrice).toBe(excelRound((book.products["189168"].pvs + book.products["189483"].pvs) * 0.9, 2));
+    expect(panel.weightKg).toBe(2);
+  });
+
+  it("un precio escrito igual al de lista (al centavo) no cuenta como ajuste", () => {
+    const pvsBook: PriceBook = { tierPct: 0, products: { ...book.products, "270876": { name: "Poste", pvs: 24.0312345678, weightKg: 1 } } };
+    const res = calculateQuote(DEFAULT_RULES, pvsBook, {
+      ...base,
+      segments: [{ systemKey: "PERIMETRAL", length: 25, height: 2.08, placa: false, puas: false, incl: 0, overrides: { "principal:270876": { unitPrice: 24.03 } } }],
+    });
+    expect(res.lines.find((l) => l.sap === "270876")).toMatchObject({ unitPrice: 24.0312345678, priceOverride: false });
   });
 
   it("respeta precios y cantidades ajustados por el asesor", () => {

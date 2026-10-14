@@ -23,7 +23,7 @@ Los 24 asesores comerciales de Ideal Alambrec cotizan hoy con un archivo Excel c
 - **Audit log inmutable**: cada acción queda registrada con usuario, fecha, IP.
 - **PDF corporativo** con marca de Ideal, enviado al cliente por correo desde la misma plataforma.
 - **Dashboard por asesor y por supervisor**: cotizaciones del día/mes, pipeline, conversión.
-- **Mismo cálculo que el Excel actual**, validado con 285 casos recalculados del archivo original; además corrige 3 errores del Excel que hoy producen cotizaciones incompletas o con sobreprecio (ver `07-hallazgos-excel.md`).
+- **Mismo cálculo que el Excel actual**, validado con 394 casos recalculados del archivo original (idénticos al centavo salvo los errores del Excel); además corrige 3 errores del Excel que hoy producen cotizaciones incompletas o con sobreprecio (ver `07-hallazgos-excel.md`).
 - **Configuración sin programador**: precios (importando el Excel de siempre), reglas de cálculo con simulador, usuarios y límites de descuento.
 
 ## Lo que necesitamos de IT (ronda 1)

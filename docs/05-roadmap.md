@@ -10,7 +10,7 @@
 - [ ] Respuestas a las 3 preguntas de `07-hallazgos-excel.md`.
 
 ## Fase 1 — Piloto / MVP
-- [x] Motor de cálculo configurable + 285 casos comparados contra el Excel.
+- [x] Motor de cálculo configurable + 394 casos comparados contra el Excel (idénticos al centavo salvo 3 errores del Excel).
 - [x] Base de datos PostgreSQL con migraciones; auditoría append-only.
 - [x] Login SSO (Microsoft/Google listo para conectar) + acceso piloto con PIN.
 - [x] Roles: asesor, supervisor, administrador, solo lectura.

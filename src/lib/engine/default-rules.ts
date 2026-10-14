@@ -17,27 +17,27 @@ export const DEFAULT_RULES: RuleSetData = {
         {
           value: 1.11,
           label: "1,11 m",
-          params: { panel1: "189168", panel2: null, postePlinto: "270873", postePlaca: "270872", tapa: "189488", perno: "270501", brazo: "189186", fijPorPoste: 3, permitePlaca: true, permitePuas: false },
+          params: { panel: "189168", postePlinto: "270873", postePlaca: "270872", tapa: "189488", perno: "270501", brazo: "189186", fijPorPoste: 3, permitePlaca: true, permitePuas: false },
         },
         {
           value: 2.08,
           label: "2,08 m",
-          params: { panel1: "189483", panel2: null, postePlinto: "270876", postePlaca: "270874", tapa: "189488", perno: "270501", brazo: "189186", fijPorPoste: 5, permitePlaca: true, permitePuas: true },
+          params: { panel: "189483", postePlinto: "270876", postePlaca: "270874", tapa: "189488", perno: "270501", brazo: "189186", fijPorPoste: 5, permitePlaca: true, permitePuas: true },
         },
         {
           value: 2.4,
           label: "2,40 m",
-          params: { panel1: "273709", panel2: null, postePlinto: "270526", postePlaca: "665190", tapa: "189197", perno: "270502", brazo: "270512", fijPorPoste: 5, permitePlaca: true, permitePuas: true },
+          params: { panel: "273709", postePlinto: "270526", postePlaca: "665190", tapa: "189197", perno: "270502", brazo: "270512", fijPorPoste: 5, permitePlaca: true, permitePuas: true },
         },
         {
           value: 3.05,
           label: "3,05 m (1,11 + 2,08)",
-          params: { panel1: "189168", panel2: "189483", postePlinto: "270527", postePlaca: null, tapa: "189197", perno: "270502", brazo: "270512", fijPorPoste: 7, permitePlaca: false, permitePuas: true },
+          params: { panel: "189168 / 189483", postePlinto: "270527", postePlaca: null, tapa: "189197", perno: "270502", brazo: "270512", fijPorPoste: 7, permitePlaca: false, permitePuas: true },
         },
         {
           value: 4.02,
           label: "4,02 m (2,08 + 2,08)",
-          params: { panel1: "189483", panel2: "189483", postePlinto: "270877", postePlaca: null, tapa: "189196", perno: "270503", brazo: "270512", fijPorPoste: 9, permitePlaca: false, permitePuas: true },
+          params: { panel: "189483 / 189483", postePlinto: "270877", postePlaca: null, tapa: "189196", perno: "270503", brazo: "270512", fijPorPoste: 9, permitePlaca: false, permitePuas: true },
         },
       ],
       variables: [
@@ -56,8 +56,8 @@ export const DEFAULT_RULES: RuleSetData = {
         { id: "fijacion", label: "Fijación", section: "principal", kind: "product", sku: "'272173'", qty: "fijaciones", pricing: "tier" },
         { id: "perno", label: "Perno coche INOX", section: "principal", kind: "product", sku: "perno", qty: "pernos", pricing: "tier" },
         { id: "tuerca", label: "Tuerca autorrompiente", section: "principal", kind: "product", sku: "'270504'", qty: "pernos", pricing: "tier" },
-        { id: "panel_inferior", label: "Panel", section: "principal", kind: "product", sku: "panel1", qty: "paneles", pricing: "tier" },
-        { id: "panel_superior", label: "Panel superior", section: "principal", kind: "product", sku: "panel2", qty: "paneles", when: "panel2 != ''", pricing: "tier" },
+        // 3,05 m and 4,02 m stack two panels per span and are priced as one unit, like the Excel.
+        { id: "panel", label: "Panel", section: "principal", kind: "product", sku: "panel", qty: "paneles", pricing: "tier" },
         { id: "perno_anclaje", label: "Perno de anclaje (4 por poste)", section: "principal", kind: "product", sku: "'189489'", qty: "postes * 4", when: "placa", pricing: "tier" },
         { id: "brazo", label: "Brazo para púas", section: "principal", kind: "product", sku: "brazo", qty: "brazos", when: "conPuas", pricing: "tier" },
         { id: "fijacion_jumbo", label: "Fijación Jumbo (3 por brazo)", section: "principal", kind: "product", sku: "'189162'", qty: "brazos * 3", when: "conPuas", pricing: "tier" },

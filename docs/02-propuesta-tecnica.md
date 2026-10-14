@@ -68,11 +68,11 @@ Las reglas del Excel se transcribieron como **datos editables**, no como código
 - **Líneas de materiales**: código SAP + cantidad + condición (“solo si hay placa”) + tipo de precio (categoría, descuento livianos, pesados).
 - **Validaciones** que bloquean o advierten (p. ej. 3,05 m no se fabrica con placa).
 
-Precio por categoría = `REDONDEAR(PVS × (1 − % categoría); 2)`, igual que el Excel. IVA configurable (15 %).
+Precio por categoría = `REDONDEAR(PVS × (1 − % categoría); 2)`; en PVS se usa el valor de lista con todos sus decimales, y los totales se calculan sin redondear y se redondean al mostrarse, igual que el Excel. IVA configurable (15 %).
 
 Las fórmulas usan un lenguaje propio y seguro (números, variables, `+ − * /`, comparaciones, `roundup`, `round`, `min`, `max`, `if`): no puede ejecutar código ni acceder a nada fuera de la cotización.
 
-**Validación:** 285 combinaciones recalculadas en el Excel original (LibreOffice) y comparadas línea por línea. Detalle en `07-hallazgos-excel.md`. Para regenerar la comparación: `npm run golden && npm test`.
+**Validación:** 394 combinaciones recalculadas en el Excel original (LibreOffice) y comparadas línea por línea; 306 son idénticas al centavo (líneas, subtotal, IVA y total) y las demás difieren solo por 3 errores del Excel que el sistema corrige. Detalle en `07-hallazgos-excel.md`. Para regenerar la comparación: `npm run golden && npm test`.
 
 ---
 

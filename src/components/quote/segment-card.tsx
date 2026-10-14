@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { AlertTriangle, ChevronDown, Copy, Calculator, RotateCcw, Trash2, XCircle } from "lucide-react";
 import type { CalcLine, CalcMessage, SegmentInput, SegmentResult, SystemRule } from "@/lib/engine/types";
-import { overrideKey } from "@/lib/engine/engine";
+import { isPriceOverride, overrideKey } from "@/lib/engine/engine";
 import { fmtMoney, fmtNumber, fmtPct, fmtQty } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/button";
@@ -158,7 +158,7 @@ export function SegmentCard({
     const key = overrideKey(line.section, line.sap!);
     const cur = { ...(segment.overrides?.[key] ?? {}), ...patch };
     if (cur.qty !== undefined && cur.qty === line.calcQty) delete cur.qty;
-    if (cur.unitPrice !== undefined && cur.unitPrice === line.listPrice) delete cur.unitPrice;
+    if (cur.unitPrice !== undefined && line.listPrice !== null && !isPriceOverride(cur.unitPrice, line.listPrice)) delete cur.unitPrice;
     const overrides = { ...(segment.overrides ?? {}) };
     if (Object.keys(cur).length) overrides[key] = cur;
     else delete overrides[key];

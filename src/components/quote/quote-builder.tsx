@@ -6,7 +6,7 @@ import { AlertTriangle, Info, Loader2, PackagePlus, Plus, Save, Trash2, XCircle 
 import { toast } from "sonner";
 import type { CustomerDTO } from "@/app/actions/customers";
 import { saveQuoteAction } from "@/app/actions/quotes";
-import { calculateQuote } from "@/lib/engine/engine";
+import { calculateQuote, isPriceOverride } from "@/lib/engine/engine";
 import type { ExtraLineInput, PriceBook, RuleSetData, SegmentInput } from "@/lib/engine/types";
 import type { ClientCatalog } from "@/lib/server/catalog-types";
 import { excelRound } from "@/lib/engine/expr";
@@ -307,7 +307,7 @@ export function QuoteBuilder(props: BuilderProps) {
                             prefix="$"
                             fixed
                             value={line?.unitPrice ?? ex.unitPrice ?? 0}
-                            onValueChange={(n) => n !== null && n >= 0 && updateExtra(ex.id, { unitPrice: ex.sap && line?.listPrice === n ? undefined : n })}
+                            onValueChange={(n) => n !== null && n >= 0 && updateExtra(ex.id, { unitPrice: ex.sap && line?.listPrice != null && !isPriceOverride(n, line.listPrice) ? undefined : n })}
                             aria-label="Precio unitario"
                           />
                         </td>
